@@ -784,6 +784,88 @@ class DiscoveryV2(BaseService):
     # Documents
     #########################
 
+    def list_documents(self,
+                     project_id: str,
+                     collection_id: str,
+                     **kwargs) -> DetailedResponse:
+        """
+        Add a document.
+
+        Add a document to a collection with optional metadata.
+        Returns immediately after the system has accepted the document for processing.
+          * The user must provide document content, metadata, or both. If the request is
+        missing both document content and metadata, it is rejected.
+          * You can set the **Content-Type** parameter on the **file** part to indicate
+        the media type of the document. If the **Content-Type** parameter is missing or is
+        one of the generic media types (for example, `application/octet-stream`), then the
+        service attempts to automatically detect the document's media type.
+          * The following field names are reserved and are filtered out if present after
+        normalization: `id`, `score`, `highlight`, and any field with the prefix of: `_`,
+        `+`, or `-`
+          * Fields with empty name values after normalization are filtered out before
+        indexing.
+          * Fields that contain the following characters after normalization are filtered
+        out before indexing: `#` and `,`
+          If the document is uploaded to a collection that shares its data with another
+        collection, the **X-Watson-Discovery-Force** header must be set to `true`.
+        **Note:** You can assign an ID to a document that you add by appending the ID to
+        the endpoint
+        (`/v2/projects/{project_id}/collections/{collection_id}/documents/{document_id}`).
+        If a document already exists with the specified ID, it is replaced.
+        **Note:** This operation works with a file upload collection. It cannot be used to
+        modify a collection that crawls an external data source.
+
+        :param str project_id: The ID of the project. This information can be found
+               from the *Integrate and Deploy* page in Discovery.
+        :param str collection_id: The ID of the collection.
+        :param BinaryIO file: (optional) The content of the document to ingest. For
+               maximum supported file size limits, see [the
+               documentation](https://cloud.ibm.com/docs/discovery-data?topic=discovery-data-collections#collections-doc-limits).
+        :param str filename: (optional) The filename for file.
+        :param str file_content_type: (optional) The content type of file.
+        :param str metadata: (optional) The maximum supported metadata file size is
+               1 MB. Metadata parts larger than 1 MB are rejected.
+               Example:  ``` {
+                 "Creator": "Johnny Appleseed",
+                 "Subject": "Apples"
+               } ```.
+        :param bool x_watson_discovery_force: (optional) When `true`, the uploaded
+               document is added to the collection even if the data for that collection is
+               shared with other collections.
+        :param dict headers: A `dict` containing the request headers
+        :return: A `DetailedResponse` containing the result, headers and HTTP status code.
+        :rtype: DetailedResponse with `dict` result representing a `DocumentAccepted` object
+        """
+
+        if project_id is None:
+            raise ValueError('project_id must be provided')
+        if collection_id is None:
+            raise ValueError('collection_id must be provided')
+        headers = {}
+        sdk_headers = get_sdk_headers(service_name=self.DEFAULT_SERVICE_NAME,
+                                      service_version='V2',
+                                      operation_id='add_document')
+        headers.update(sdk_headers)
+
+        params = {'version': self.version}
+
+        if 'headers' in kwargs:
+            headers.update(kwargs.get('headers'))
+        # headers['Accept'] = 'application/json'
+
+        path_param_keys = ['project_id', 'collection_id']
+        path_param_values = self.encode_path_vars(project_id, collection_id)
+        path_param_dict = dict(zip(path_param_keys, path_param_values))
+        url = '/v2/projects/{project_id}/collections/{collection_id}/documents'.format(
+            **path_param_dict)
+        request = self.prepare_request(method='GET',
+                                       url=url,
+                                       headers=headers,
+                                       params=params)
+
+        response = self.send(request, **kwargs)
+        return response
+
     def add_document(self,
                      project_id: str,
                      collection_id: str,
